@@ -13,6 +13,7 @@ numbersToCheck = []
 checkedValue = ""
 blankSpaceArray = []
 
+
 def columnCreator():
     i = 0
     while i < 9:
@@ -49,6 +50,7 @@ def boxCreator():
         columnIndex = 0
         rowIndex += 1
 
+
 def checkBoxWithCoordinates(rowIndex, columnIndex):
     boxNumber = 0
     if rowIndex < 3 and columnIndex < 3:
@@ -76,28 +78,73 @@ def checkBoxWithCoordinates(rowIndex, columnIndex):
 def checkRowColumn(rowIndex, columnIndex):
     possibilities = []
     for number in range(1, 10):
-        check = number not in board[rowIndex] and number not in columns[columnIndex] and number not in box[checkBoxWithCoordinates(rowIndex, columnIndex)]
+        check = number not in board[rowIndex] and number not in columns[columnIndex] and number not in box[
+            checkBoxWithCoordinates(rowIndex, columnIndex)]
         if check is True:
             possibilities.append(number)
     return possibilities
 
 
-def blankSpaceOptions():
-    rowIndex = 0
-    for row in board:
-        columnIndex = 0
-        for num in row:
-            if num == 0:
-                blankSpaceArray.append([[rowIndex, columnIndex], checkRowColumn(rowIndex, columnIndex), 0])
-            columnIndex += 1
+def getAllBlankSpacePossibilities(rowIndex, columnIndex):
+    if columnIndex == 8:
         rowIndex += 1
+        columnIndex = 0
+    else:
+        columnIndex += 1
+    for row in board[rowIndex:]:
+        for num in row[columnIndex:]:
+            if num == 0:
+                blankSpaceArray.append([[rowIndex, columnIndex], checkRowColumn(rowIndex, columnIndex), 9])
+            columnIndex += 1
+            if columnIndex > 8:
+                columnIndex = 0
+                rowIndex += 1
+                if rowIndex > 8:
+                    break
+                continue
 
+
+
+def fillPositionInBoard(numOfBlankSpace, pointer):
+    board[blankSpaceArray[numOfBlankSpace][0][0]][blankSpaceArray[numOfBlankSpace][0][1]] = \
+        (blankSpaceArray[numOfBlankSpace][1][pointer])
+    rowIndex = blankSpaceArray[numOfBlankSpace][0][0]
+    columnIndex = blankSpaceArray[numOfBlankSpace][0][1]
+    print(board)
+    keepPreviousPossibilities = numOfBlankSpace + 1
+    del blankSpaceArray[keepPreviousPossibilities:]
+    getAllBlankSpacePossibilities(rowIndex, columnIndex)
+
+# possible room for optimization: dont calculate all possibilites for all original blankspaces
 def bruteforce():
-    board[blankSpaceArray[0][0][0]][blankSpaceArray[0][0][1]] = (blankSpaceArray[0][1][0])
+    numOfBlankSpace = 0
+    while numOfBlankSpace < len(blankSpaceArray):
+        # No possibilites
+        if len(blankSpaceArray[numOfBlankSpace][1]) == 0:
+            # We go one position back
+            numOfBlankSpace -= 1
+            # Increment the pointer
+            blankSpaceArray[numOfBlankSpace][2] += 1
+            # If pointer exceeds the end of array len
+            while blankSpaceArray[numOfBlankSpace][2] >= (len(blankSpaceArray[numOfBlankSpace][1]) - 1):
+                blankSpaceArray[numOfBlankSpace][2] = 0
+                numOfBlankSpace -= 1
+            if blankSpaceArray[numOfBlankSpace][2] < (len(blankSpaceArray[numOfBlankSpace][1]) - 1):
+                blankSpaceArray[numOfBlankSpace][2] += 1
+                fillPositionInBoard(numOfBlankSpace, blankSpaceArray[numOfBlankSpace][2])
+                numOfBlankSpace += 1
+    # Filling Position with value for the first time
+        elif blankSpaceArray[numOfBlankSpace][2] == 9:
+            blankSpaceArray[numOfBlankSpace][2] = 0
+            fillPositionInBoard(numOfBlankSpace, blankSpaceArray[numOfBlankSpace][2])
+            numOfBlankSpace += 1
+
+        else:
+            fillPositionInBoard(numOfBlankSpace, blankSpaceArray[numOfBlankSpace][2])
+            numOfBlankSpace += 1
 
 boxCreator()
 columnCreator()
-blankSpaceOptions()
-print(board)
+getAllBlankSpacePossibilities(0, -1)
 bruteforce()
 print(board)
