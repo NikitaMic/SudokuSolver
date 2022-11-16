@@ -1,10 +1,16 @@
 from collections import OrderedDict, deque
 
-board = [[5, 3, 0, 0, 7, 0, 0, 0, 0], [6, 0, 0, 1, 9, 5, 0, 0, 0],
-         [0, 9, 8, 0, 0, 0, 0, 6, 0], [8, 0, 0, 0, 6, 0, 0, 0, 3],
-         [4, 0, 0, 8, 0, 3, 0, 0, 1], [7, 0, 0, 0, 2, 0, 0, 0, 6],
-         [0, 6, 0, 0, 0, 0, 2, 8, 0], [0, 0, 0, 4, 1, 9, 0, 0, 5],
-         [0, 0, 0, 0, 8, 0, 0, 7, 9]]
+
+board = [[3, 1, 6, 5, 7, 8, 4, 9, 2 ],
+          [ 5, 2, 9, 1, 3, 4, 7, 6, 8 ],
+          [ 4, 8, 7, 6, 2, 9, 5, 3, 1 ],
+          [ 2, 6, 3, 0, 1, 5, 9, 8, 7 ],
+          [ 9, 7, 4, 8, 6, 0, 1, 2, 5 ],
+          [ 8, 5, 1, 7, 9, 2, 6, 4, 3 ],
+          [ 1, 3, 8, 0, 4, 7, 2, 0, 6 ],
+          [ 6, 9, 2, 3, 5, 1, 8, 7, 4 ],
+          [ 7, 4, 5, 0, 8, 6, 3, 1, 0]]
+
 columns = []
 column = []
 box = {1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []}
@@ -84,6 +90,21 @@ def checkRowColumn(rowIndex, columnIndex):
             possibilities.append(number)
     return possibilities
 
+def fillBox(row, column, numberToFill):
+    boxNr = checkBoxWithCoordinates(row, column)
+    rowAdjustor = 0
+    columnAdjustor = 0
+    boxIndex = 0
+    if boxNr in [2, 5, 8]:
+        columnAdjustor = -3
+    elif boxNr in [3, 6, 9]:
+        columnAdjustor = -6
+    if 3 < boxNr < 7:
+        rowAdjustor = -3
+    elif 6 < boxNr < 10:
+        rowAdjustor = -6
+    boxIndex = ((row + rowAdjustor) * 3) + (column + columnAdjustor)
+    box[boxNr][boxIndex] = numberToFill
 
 def getAllBlankSpacePossibilities(rowIndex, columnIndex):
     if columnIndex == 8:
@@ -106,11 +127,16 @@ def getAllBlankSpacePossibilities(rowIndex, columnIndex):
 
 
 def fillPositionInBoard(numOfBlankSpace, pointer):
+    #put number in board
     board[blankSpaceArray[numOfBlankSpace][0][0]][blankSpaceArray[numOfBlankSpace][0][1]] = \
         (blankSpaceArray[numOfBlankSpace][1][pointer])
     rowIndex = blankSpaceArray[numOfBlankSpace][0][0]
     columnIndex = blankSpaceArray[numOfBlankSpace][0][1]
-    print(board)
+    #put number in box
+    fillBox(rowIndex, columnIndex, blankSpaceArray[numOfBlankSpace][1][pointer])
+    #put number in column
+    columns.clear()
+    columnCreator()
     keepPreviousPossibilities = numOfBlankSpace + 1
     del blankSpaceArray[keepPreviousPossibilities:]
     getAllBlankSpacePossibilities(rowIndex, columnIndex)
@@ -123,10 +149,15 @@ def bruteforce():
         if len(blankSpaceArray[numOfBlankSpace][1]) == 0:
             # We go one position back
             numOfBlankSpace -= 1
-            # Increment the pointer
-            blankSpaceArray[numOfBlankSpace][2] += 1
-            # If pointer exceeds the end of array len
-            while blankSpaceArray[numOfBlankSpace][2] >= (len(blankSpaceArray[numOfBlankSpace][1]) - 1):
+            # If pointer exceeds the end of array len we reset pointer and repeat
+            while blankSpaceArray[numOfBlankSpace][2] == (len(blankSpaceArray[numOfBlankSpace][1]) - 1):
+                #remove impossible value from board
+                board[blankSpaceArray[numOfBlankSpace][0][0]][blankSpaceArray[numOfBlankSpace][0][1]] = 0
+                #remove impossible value from box
+                fillBox(blankSpaceArray[numOfBlankSpace][0][0], blankSpaceArray[numOfBlankSpace][0][1], 0)
+                #refresh columns
+                columns.clear()
+                columnCreator()
                 blankSpaceArray[numOfBlankSpace][2] = 0
                 numOfBlankSpace -= 1
             if blankSpaceArray[numOfBlankSpace][2] < (len(blankSpaceArray[numOfBlankSpace][1]) - 1):
