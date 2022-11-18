@@ -1,11 +1,18 @@
+import time
 from collections import OrderedDict, deque
 
 
-board = [[5, 3, 0, 0, 7, 0, 0, 0, 0], [6, 0, 0, 1, 9, 5, 0, 0, 0],
-         [0, 9, 8, 0, 0, 0, 0, 6, 0], [8, 0, 0, 0, 6, 0, 0, 0, 3],
-         [4, 0, 0, 8, 0, 3, 0, 0, 1], [7, 0, 0, 0, 2, 0, 0, 0, 6],
-         [0, 6, 0, 0, 0, 0, 2, 8, 0], [0, 0, 0, 4, 1, 9, 0, 0, 5],
+board = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
+         [6, 0, 0, 1, 9, 5, 0, 0, 0],
+         [0, 9, 8, 0, 0, 0, 0, 6, 0],
+         [8, 0, 0, 0, 6, 0, 0, 0, 3],
+         [4, 0, 0, 8, 0, 3, 0, 0, 1],
+         [7, 0, 0, 0, 2, 0, 0, 0, 6],
+         [0, 6, 0, 0, 0, 0, 2, 8, 0],
+         [0, 0, 0, 4, 1, 9, 0, 0, 5],
          [0, 0, 0, 0, 8, 0, 0, 7, 9]]
+
+
 
 columns = []
 column = []
@@ -15,7 +22,7 @@ numbersToCheck = []
 checkedValue = ""
 blankSpaceArray = []
 
-
+#Create 9 Column arrays for verification of possible valid numbers
 def columnCreator():
     i = 0
     while i < 9:
@@ -25,7 +32,7 @@ def columnCreator():
         column.clear()
         i += 1
 
-
+#Create 9 Box Arrays for verification of possible valid numbers
 def boxCreator():
     rowIndex = 0
     columnIndex = 0
@@ -137,7 +144,6 @@ def fillPositionInBoard(numOfBlankSpace, pointer):
     del blankSpaceArray[keepPreviousPossibilities:]
     getAllBlankSpacePossibilities(rowIndex, columnIndex)
 
-# possible room for optimization: dont calculate all possibilites for all original blankspaces
 def bruteforce():
     numOfBlankSpace = 0
     while numOfBlankSpace < len(blankSpaceArray):
@@ -170,8 +176,10 @@ def bruteforce():
             fillPositionInBoard(numOfBlankSpace, blankSpaceArray[numOfBlankSpace][2])
             numOfBlankSpace += 1
 
+start = time.time()
 boxCreator()
 columnCreator()
 getAllBlankSpacePossibilities(0, -1)
 bruteforce()
-print(board)
+end = time.time()
+print(end - start)
